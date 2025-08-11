@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - ./models:/app/models
+      - ./firebase-service-account.json:/app/firebase-service-account.json
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=True
+      - FIREBASE_SERVICE_ACCOUNT_PATH=/app/firebase-service-account.json
+      - VOSK_MODEL_PATH=/app/models/vosk-model-ar-0.22
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - speech2arabic-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    networks:
+      - speech2arabic-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - speech2arabic-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - speech2arabic-network
+
+networks:
+  speech2arabic-network:
+    driver: bridge
+
+volumes:
+  redis_data:
