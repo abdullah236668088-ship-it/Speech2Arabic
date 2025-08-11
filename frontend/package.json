@@ -1,6 +1,8 @@
 {
     "name": "speech2arabic-frontend",
     "version": "1.0.0",
+    "description": "Frontend for Speech2Arabic - a speech-to-text application for Arabic",
+    "main": "index.js",
     "private": true,
     "dependencies": {
         "react": "^18.2.0",
@@ -41,5 +43,6 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
-    }
+    },
+    "$schema": "https://json.schemastore.org/package.json"
 }
