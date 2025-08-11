@@ -1,9 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-
-from backend.firebase_config import get_firestore_client
-
+import json
 import uuid
 from werkzeug.utils import secure_filename
 import logging
@@ -59,13 +57,16 @@ def upload_file():
             file.save(filepath)
             logger.info(f"تم رفع الملف: {filepath}")
             
-            # حفظ بيانات الرفع في Firestore
+            # حفظ بيانات الرفع محلياً
             data = {
                 'filename': unique_filename,
-                'filepath': filepath
+                'filepath': filepath,
+                'upload_time': str(uuid.uuid4())
             }
-            doc_ref = firestore_client.collection('uploads').document()
-            doc_ref.set(data)
+            # حفظ في ملف JSON محلي
+            with open('uploads_metadata.json', 'a') as f:
+                json.dump(data, f)
+                f.write('\n')
             
             return jsonify({
                 'message': 'تم رفع الملف بنجاح',
